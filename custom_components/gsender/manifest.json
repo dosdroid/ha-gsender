@@ -1,0 +1,11 @@
+{
+  "domain": "gsender",
+  "name": "gSender",
+  "codeowners": ["@dosdroid"],
+  "config_flow": true,
+  "documentation": "https://github.com/dosdroid/ha-gsender",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/dosdroid/ha-gsender/issues",
+  "requirements": ["python-socketio[asyncio_client]==5.11.0"],
+  "version": "0.4.0"
+}

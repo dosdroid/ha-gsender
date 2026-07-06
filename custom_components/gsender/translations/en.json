@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to gSender",
+        "description": "Enable Remote Mode in gSender (Config -> Remote Mode) first and enter the IP/port shown there. The serial port path (e.g. /dev/ttyUSB0) must match the port gSender's main app is already connected to.",
+        "data": {
+          "host": "Host / IP address",
+          "port": "Port",
+          "serial_port": "Serial port path (e.g. /dev/ttyUSB0)",
+          "baudrate": "Baud rate",
+          "firmware": "Controller firmware (for the Connect button)"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure gSender",
+        "description": "Update the connection details. Useful when the gSender PC got a new IP address or the CNC moved to a different serial port.",
+        "data": {
+          "host": "Host / IP address",
+          "port": "Port",
+          "serial_port": "Serial port path (e.g. /dev/ttyUSB0)",
+          "baudrate": "Baud rate",
+          "firmware": "Controller firmware (for the Connect button)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to gSender's remote server. Check that Remote Mode is enabled and the IP/port are correct."
+    },
+    "abort": {
+      "already_configured": "This gSender instance is already configured.",
+      "reconfigure_successful": "Connection details updated."
+    }
+  }
+}

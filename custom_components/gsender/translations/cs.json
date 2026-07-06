@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Připojit ke gSenderu",
+        "description": "Nejprve v gSenderu zapněte Remote Mode (Config -> Remote Mode) a zadejte IP adresu a port, které tam vidíte. Cesta k sériovému portu (např. /dev/ttyUSB0) musí přesně odpovídat portu, ke kterému je hlavní aplikace gSender už připojena.",
+        "data": {
+          "host": "Host / IP adresa",
+          "port": "Port",
+          "serial_port": "Cesta k sériovému portu (např. /dev/ttyUSB0)",
+          "baudrate": "Přenosová rychlost (baud)",
+          "firmware": "Firmware kontroléru (pro tlačítko Připojit)"
+        }
+      },
+      "reconfigure": {
+        "title": "Přenastavit gSender",
+        "description": "Upravte údaje o připojení. Hodí se, když počítač s gSenderem dostal novou IP adresu nebo je CNC na jiném sériovém portu.",
+        "data": {
+          "host": "Host / IP adresa",
+          "port": "Port",
+          "serial_port": "Cesta k sériovému portu (např. /dev/ttyUSB0)",
+          "baudrate": "Přenosová rychlost (baud)",
+          "firmware": "Firmware kontroléru (pro tlačítko Připojit)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nepodařilo se připojit ke vzdálenému serveru gSenderu. Zkontrolujte, že je Remote Mode zapnutý a IP adresa a port jsou správně."
+    },
+    "abort": {
+      "already_configured": "Tato instance gSenderu je už nastavená.",
+      "reconfigure_successful": "Údaje o připojení byly aktualizovány."
+    }
+  }
+}
