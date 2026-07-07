@@ -1,6 +1,8 @@
 > [!CAUTION]
 > Integration has not been fully tested. Any feedback is welcomed.
 
+
+
 <p align="center">
   <img src="custom_components/gsender/brand/icon.png" alt="gSender integration icon" width="128">
 </p>
