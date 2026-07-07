@@ -129,7 +129,7 @@ vs "PC is on, remind me to launch gSender".
    - **Baud rate** and **firmware** (`Grbl` / `grblHAL`) — only used by the
      Connect button; defaults suit most machines
 3. Everything can be changed later via **Reconfigure** on the integration
-   entry (handy when the gSender PC gets a new DHCP address)
+   entry (handy when the gSender PC gets a new DHCP address) but it is recommended to put CNC PC on static address.
 
 ## How it works (technical)
 
