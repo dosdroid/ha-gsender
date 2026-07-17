@@ -40,11 +40,36 @@ is not "published" to users until the release exists.
   `pip install "python-socketio[asyncio_client]==5.11.0" voluptuous`
   then `python tests/smoke_test.py`. Keep it green and extend it when
   changing behavior.
-- For end-to-end verification, a real socket.io server works well: start
-  `socketio.AsyncServer` (aiohttp) that answers `addclient` with a
-  `controller:state` emit, and run the real `GSenderClient` against it
-  (see the v0.5.0 fix verification: server started *after*
-  `async_setup_entry` to prove background connect works).
+- `tests/live_test.py` is a real-socket end-to-end check of the host-off
+  startup recovery (same deps, takes ~5 s): it runs `async_setup_entry`
+  with nothing listening, then starts a real gSender-like socket.io server
+  and asserts the integration connects and attaches on its own. Run both
+  tests before releasing behavior changes.
+
+## Deliberate decisions & known unknowns
+
+- The config flow still **rejects an unreachable host when adding or
+  reconfiguring** the integration, even though setup tolerates a down
+  host. That split is intentional (owner-confirmed): at add-time a
+  failure almost always means a typo'd IP or Remote Mode disabled, and
+  accepting it would create an entry stuck at `host_off` forever. Don't
+  "fix" this for consistency.
+- `elapsedTime`/`remainingTime` from `sender:status` are **assumed** to be
+  milliseconds (never verified against a live job) — see the comment on
+  `job_elapsed_seconds` in `__init__.py`. If real jobs show values 1000x
+  off, fix it there only.
+- gSender's `task:*` events are unused on purpose: their payload shapes
+  are unverified. Job events derive from `workflow:state` transitions.
+- The smoke test monkeypatches module globals (`HOST_PROBE_TIMEOUT`,
+  `CONNECT_RETRY_INTERVAL`) to speed things up — keep timing constants
+  module-level in `__init__.py` and read them at call time; never copy
+  them into other modules via `from ... import`.
+- `manifest.json` `"version"` is the single source of truth; the release
+  tag is always `v<version>`. `hacs.json` pins minimum HA 2026.3.0 (keep
+  it in sync with the README's Requirements section).
+- Probe cadence (15 s) was questioned by the owner and deliberately kept
+  flat instead of backing off: it's one bounded TCP SYN per interval, and
+  backoff would delay noticing the CNC PC booting.
 
 ## Architecture invariants (do not break)
 

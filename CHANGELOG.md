@@ -8,6 +8,13 @@ Each release's notes are published automatically as a
 [GitHub release](https://github.com/dosdroid/ha-gsender/releases), which is
 what HACS installs.
 
+## [Unreleased]
+
+- `tests/live_test.py`: real-socket end-to-end test of host-off startup
+  recovery (server started after setup; asserts automatic connect).
+- `CLAUDE.md`: release process, testing notes, deliberate decisions, and
+  architecture invariants for future development sessions.
+
 ## [0.5.0] - 2026-07-17
 
 ### Fixed
