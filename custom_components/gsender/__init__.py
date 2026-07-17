@@ -18,7 +18,7 @@ import socketio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (
@@ -53,6 +53,11 @@ HOST_PROBE_TIMEOUT = 3
 # Retry attaching to the controller while the socket is connected but the
 # CNC serial port isn't open on the gSender side yet.
 ATTACH_RETRY_INTERVAL = 15
+# Seconds between attempts to establish the INITIAL connection when the
+# host is down at setup time (HA restarted while the CNC PC is off).
+# python-socketio's built-in reconnection only takes over after the first
+# successful connect.
+CONNECT_RETRY_INTERVAL = 15
 # How long after 'addclient' before concluding no controller responded.
 ATTACH_TIMEOUT = 5
 
@@ -104,6 +109,9 @@ class GSenderClient:
         )
         self._watchdog_task: asyncio.Task | None = None
         self._attach_check_task: asyncio.Task | None = None
+        # Runs async_connect_retrying() until the first successful connect;
+        # while it's alive the watchdog leaves host probing to it.
+        self._connect_task: asyncio.Task | None = None
         self._register_handlers()
 
     # ------------------------------------------------------------------
@@ -281,42 +289,91 @@ class GSenderClient:
             if self.connected and not self.controller_attached:
                 self._schedule_attach_check()
             elif not self.connected:
+                if self._connect_task and not self._connect_task.done():
+                    # Initial connect loop is still running - it probes and
+                    # classifies the host itself; don't double the traffic.
+                    continue
                 await self._probe_host()
 
-    async def _probe_host(self) -> None:
-        """Classify why the bridge is down: gSender gone vs whole PC gone.
+    # Single-TCP-probe results - internal only.
+    _PROBE_ACCEPTS = "accepts"
+    _PROBE_REFUSED = "refused"
+    _PROBE_UNREACHABLE = "unreachable"
 
-        One TCP connect attempt to the port we normally talk to - runs ONLY
-        while disconnected (a connected socket already proves the host is
-        up), so there is no probe traffic at all in normal operation:
-        - accepted: gSender is (back) up; socket.io reconnect will follow
+    async def _probe_host_once(self) -> str:
+        """One bounded TCP connect attempt to the port we normally talk to.
+
+        - accepts: something is listening (gSender is up, or at least its port)
         - refused (RST): the PC is on but gSender/Remote Mode isn't listening
-        - timeout / no route: the PC is off or unreachable (a firewall that
-          DROPs would look the same - acceptable ambiguity)
+        - unreachable: timeout / no route - the PC is off or unreachable (a
+          firewall that DROPs would look the same - acceptable ambiguity)
         """
-        if self.connected:
-            return
         try:
             _, writer = await asyncio.wait_for(
                 asyncio.open_connection(self.host, self.port),
                 timeout=HOST_PROBE_TIMEOUT,
             )
-            writer.close()
-            try:
-                await writer.wait_closed()
-            except OSError:
-                pass
-            # Port accepts again; report PC up. The reconnecting socket.io
-            # client will flip us to online shortly.
-            status = HOST_STATUS_GSENDER_DOWN
         except ConnectionRefusedError:
-            status = HOST_STATUS_GSENDER_DOWN
+            return self._PROBE_REFUSED
         except (TimeoutError, OSError):
-            status = HOST_STATUS_HOST_OFF
+            return self._PROBE_UNREACHABLE
+        writer.close()
+        try:
+            await writer.wait_closed()
+        except OSError:
+            pass
+        return self._PROBE_ACCEPTS
+
+    def _set_host_status(self, status: str) -> None:
         if status != self.host_status:
             _LOGGER.info("gSender host probe: %s", status)
             self.host_status = status
             self._push_update()
+
+    async def _probe_host(self) -> None:
+        """Classify why the bridge is down: gSender gone vs whole PC gone.
+
+        Runs ONLY while disconnected (a connected socket already proves the
+        host is up), so there is no probe traffic at all in normal operation.
+        A port that accepts again also maps to gsender_down: it means the PC
+        is up, and the reconnecting socket.io client will flip us to online
+        shortly.
+        """
+        if self.connected:
+            return
+        if await self._probe_host_once() == self._PROBE_UNREACHABLE:
+            self._set_host_status(HOST_STATUS_HOST_OFF)
+        else:
+            self._set_host_status(HOST_STATUS_GSENDER_DOWN)
+
+    async def async_connect_retrying(self) -> None:
+        """Establish the initial connection, retrying until it succeeds.
+
+        python-socketio only auto-reconnects after a connection has succeeded
+        once; a failed initial connect() just raises and stays dead. So when
+        the CNC PC is off while HA (re)starts, this loop keeps trying in the
+        background instead of failing the config entry setup. Each round
+        starts with the cheap bounded TCP probe - it keeps the host status
+        sensor truthful and avoids long socket.io connect hangs against a
+        host that is off. After the first successful connect, the built-in
+        reconnection logic owns the socket and this task ends.
+        """
+        while not self._shutting_down:
+            result = await self._probe_host_once()
+            if result == self._PROBE_ACCEPTS:
+                try:
+                    await self.async_connect()
+                    return
+                except (socketio.exceptions.ConnectionError, OSError) as err:
+                    _LOGGER.debug(
+                        "Initial connection to %s failed: %s", self.url, err
+                    )
+                    self._set_host_status(HOST_STATUS_GSENDER_DOWN)
+            elif result == self._PROBE_REFUSED:
+                self._set_host_status(HOST_STATUS_GSENDER_DOWN)
+            else:
+                self._set_host_status(HOST_STATUS_HOST_OFF)
+            await asyncio.sleep(CONNECT_RETRY_INTERVAL)
 
     # ------------------------------------------------------------------
     # helpers / lifecycle
@@ -422,6 +479,8 @@ class GSenderClient:
         self._shutting_down = True
         if self._attach_check_task and not self._attach_check_task.done():
             self._attach_check_task.cancel()
+        if self._connect_task and not self._connect_task.done():
+            self._connect_task.cancel()
         try:
             if self.sio.connected:
                 await self.sio.disconnect()
@@ -457,17 +516,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     firmware = entry.data.get(CONF_FIRMWARE, DEFAULT_FIRMWARE)
 
     client = GSenderClient(hass, host, port, serial_port, baudrate, firmware)
-
-    try:
-        await client.async_connect()
-    except Exception as err:  # noqa: BLE001
-        await client.async_disconnect()
-        raise ConfigEntryNotReady(
-            f"Could not connect to gSender at {host}:{port}: {err}"
-        ) from err
-
-    # Only store after a successful connection so failed setups don't leak.
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = client
+
+    # Setup must succeed even when the CNC PC is off - an HA restart while
+    # the machine was down used to leave the entry stuck in setup-retry with
+    # no entities at all. Instead, connect in the background: entities start
+    # unavailable (host status shows host_off/gsender_down) and come alive
+    # on their own the moment gSender is reachable.
+    client._connect_task = entry.async_create_background_task(
+        hass, client.async_connect_retrying(), name="gsender_connect"
+    )
 
     # Watchdog is tied to the entry lifecycle: HA cancels it on unload.
     entry.async_create_background_task(hass, client.watchdog(), name="gsender_watchdog")

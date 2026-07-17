@@ -146,6 +146,9 @@ vs "PC is on, remind me to launch gSender".
   `alarm` broadcasts
 - A watchdog re-attaches automatically after gSender restarts, the port
   reopens, or the connection drops
+- Home Assistant can start (or restart) while the CNC PC is off: the
+  integration loads anyway, shows `host_off`, and connects on its own as
+  soon as gSender becomes reachable — no reload needed
 - If gSender's Remote Mode isn't connected to the controller yet, entities
   show `no_controller` until the port opens (or you press Connect)
 

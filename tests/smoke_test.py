@@ -415,6 +415,57 @@ async def main() -> None:
     ok(diag["entry_data"]["host"] == "**REDACTED**", "diagnostics redacts host")
     ok("machine_state" in diag["client"], "diagnostics includes client state")
 
+    print("setup with host off (HA restart while CNC PC is down)")
+    gsender_module.CONNECT_RETRY_INTERVAL = 0.05
+    hass2 = HomeAssistant()
+
+    async def _forward(entry_arg, platforms):
+        pass
+
+    hass2.config_entries = types.SimpleNamespace(
+        async_forward_entry_setups=_forward
+    )
+    entry2 = ConfigEntry(
+        "entry2",
+        {"host": "192.0.2.1", "port": 8000, "serial_port": "/dev/ttyUSB0"},
+    )
+    asyncio.open_connection = unreachable
+    ok(
+        await gsender_module.async_setup_entry(hass2, entry2) is True,
+        "setup succeeds with host unreachable (no ConfigEntryNotReady)",
+    )
+    client2 = hass2.data["gsender"]["entry2"]
+    sio_connects: list[str] = []
+
+    async def fake_sio_connect(url, transports=None):
+        sio_connects.append(url)
+
+    client2.sio.connect = fake_sio_connect
+    host2_sensor = GSenderHostStatusSensor(client2, entry2)
+    machine2 = GSenderMachineStateSensor(client2, entry2)
+    await asyncio.sleep(0.1)
+    ok(host2_sensor.native_value == "host_off", "host classified off while retrying")
+    ok(not machine2.available, "entities unavailable while host off")
+    ok(sio_connects == [], "no socket.io connect attempted while host off")
+
+    class _FakeWriter:
+        def close(self):
+            pass
+
+        async def wait_closed(self):
+            pass
+
+    async def accepts(host, port):
+        return None, _FakeWriter()
+
+    asyncio.open_connection = accepts  # the PC just booted with gSender up
+    await asyncio.sleep(0.2)
+    ok(sio_connects == [client2.url], "connects exactly once host is reachable")
+    ok(client2._connect_task.done(), "connect loop ends after first success")
+    asyncio.open_connection = real_open_connection
+    for task in hass2._tasks:
+        task.cancel()
+
     print(f"\nall {PASSED} checks passed")
 
 
