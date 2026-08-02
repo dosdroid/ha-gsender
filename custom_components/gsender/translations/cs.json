@@ -3,23 +3,25 @@
     "step": {
       "user": {
         "title": "Připojit ke gSenderu",
-        "description": "Nejprve v gSenderu zapněte Remote Mode (Config -> Remote Mode) a zadejte IP adresu a port, které tam vidíte. Cesta k sériovému portu (např. /dev/ttyUSB0) musí přesně odpovídat portu, ke kterému je hlavní aplikace gSender už připojena.",
+        "description": "Nejprve v gSenderu zapněte Remote Mode (Config -> Remote Mode) a zadejte IP adresu a port, které tam vidíte. Port kontroléru musí přesně odpovídat tomu, k čemu se připojuje hlavní aplikace gSender: cesta k sériovému portu jako /dev/ttyUSB0 nebo COM3 pro USB, nebo IP adresa kontroléru (např. 192.168.5.1) pro desky s Ethernetem jako SLB-EXT.",
         "data": {
-          "host": "Host / IP adresa",
-          "port": "Port",
-          "serial_port": "Cesta k sériovému portu (např. /dev/ttyUSB0)",
-          "baudrate": "Přenosová rychlost (baud)",
+          "host": "Host / IP adresa počítače s gSenderem",
+          "port": "Port Remote Mode",
+          "serial_port": "Port kontroléru (sériová cesta nebo IP kontroléru)",
+          "network": "Kontrolér je připojen přes Ethernet/síť (např. SLB-EXT)",
+          "baudrate": "Přenosová rychlost (u Ethernetu se ignoruje)",
           "firmware": "Firmware kontroléru (pro tlačítko Připojit)"
         }
       },
       "reconfigure": {
         "title": "Přenastavit gSender",
-        "description": "Upravte údaje o připojení. Hodí se, když počítač s gSenderem dostal novou IP adresu nebo je CNC na jiném sériovém portu.",
+        "description": "Upravte údaje o připojení. Hodí se, když počítač s gSenderem dostal novou IP adresu nebo je CNC na jiném portu.",
         "data": {
-          "host": "Host / IP adresa",
-          "port": "Port",
-          "serial_port": "Cesta k sériovému portu (např. /dev/ttyUSB0)",
-          "baudrate": "Přenosová rychlost (baud)",
+          "host": "Host / IP adresa počítače s gSenderem",
+          "port": "Port Remote Mode",
+          "serial_port": "Port kontroléru (sériová cesta nebo IP kontroléru)",
+          "network": "Kontrolér je připojen přes Ethernet/síť (např. SLB-EXT)",
+          "baudrate": "Přenosová rychlost (u Ethernetu se ignoruje)",
           "firmware": "Firmware kontroléru (pro tlačítko Připojit)"
         }
       }

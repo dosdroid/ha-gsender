@@ -24,9 +24,11 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from .const import (
     CONF_BAUDRATE,
     CONF_FIRMWARE,
+    CONF_NETWORK,
     CONF_SERIAL_PORT,
     DEFAULT_BAUDRATE,
     DEFAULT_FIRMWARE,
+    DEFAULT_NETWORK,
     DOMAIN,
     EVENT_ALARM,
     EVENT_JOB_FINISHED,
@@ -73,13 +75,19 @@ class GSenderClient:
         serial_port: str,
         baudrate: int = DEFAULT_BAUDRATE,
         firmware: str = DEFAULT_FIRMWARE,
+        network: bool = DEFAULT_NETWORK,
     ) -> None:
         self.hass = hass
         self.host = host
         self.port = port
+        # For network-connected controllers (e.g. SLB-EXT over Ethernet)
+        # this is the controller's IP address, not a serial device path -
+        # gSender identifies both kinds of connection by the same "port"
+        # string in its events and port list.
         self.serial_port = serial_port
         self.baudrate = baudrate
         self.firmware = firmware
+        self.network = network
         self.url = f"http://{host}:{port}"
 
         # Socket to gSender's remote server is up.
@@ -452,7 +460,7 @@ class GSenderClient:
         options = {
             "baudrate": self.baudrate,
             "rtscts": False,
-            "network": False,
+            "network": self.network,
             "defaultFirmware": self.firmware,
         }
         _LOGGER.info("Asking gSender to open %s (%s)", self.serial_port, options)
@@ -523,8 +531,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # .get() fallbacks: entries created before these fields existed.
     baudrate = entry.data.get(CONF_BAUDRATE, DEFAULT_BAUDRATE)
     firmware = entry.data.get(CONF_FIRMWARE, DEFAULT_FIRMWARE)
+    network = entry.data.get(CONF_NETWORK, DEFAULT_NETWORK)
 
-    client = GSenderClient(hass, host, port, serial_port, baudrate, firmware)
+    client = GSenderClient(hass, host, port, serial_port, baudrate, firmware, network)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = client
 
     # Setup must succeed even when the CNC PC is off - an HA restart while

@@ -8,7 +8,19 @@ Each release's notes are published automatically as a
 [GitHub release](https://github.com/dosdroid/ha-gsender/releases), which is
 what HACS installs.
 
-## [Unreleased]
+## [0.6.0] - 2026-08-02
+
+### Added
+
+- Support for controllers connected to the gSender PC over
+  **Ethernet/network** (e.g. the SLB-EXT's built-in Ethernet): the
+  controller-port field now also accepts the controller's IP address as
+  shown in gSender, and a new **Ethernet/network** checkbox makes the
+  Connect button send `network: true` just like gSender's own UI. Existing
+  USB-serial entries are unaffected (the option defaults to off).
+  *Not yet confirmed on real hardware — feedback welcome.*
+- `tests/live_test.py`: real-socket end-to-end test of host-off startup
+  recovery (server started after setup; asserts automatic connect).
 
 ### Fixed
 
@@ -16,13 +28,6 @@ what HACS installs.
   longer leaks an aiohttp client session (python-socketio leaves its
   session open after a failed connect). The same cleanup runs when
   unloading an entry that never managed to connect.
-
-### Added
-
-- `tests/live_test.py`: real-socket end-to-end test of host-off startup
-  recovery (server started after setup; asserts automatic connect).
-- `CLAUDE.md`: release process, testing notes, deliberate decisions, and
-  architecture invariants for future development sessions.
 
 ## [0.5.0] - 2026-07-17
 

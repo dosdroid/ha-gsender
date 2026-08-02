@@ -3,23 +3,25 @@
     "step": {
       "user": {
         "title": "Connect to gSender",
-        "description": "Enable Remote Mode in gSender (Config -> Remote Mode) first and enter the IP/port shown there. The serial port path (e.g. /dev/ttyUSB0) must match the port gSender's main app is already connected to.",
+        "description": "Enable Remote Mode in gSender (Config -> Remote Mode) first and enter the IP/port shown there. The controller port must match exactly what gSender's main app connects to: a serial path like /dev/ttyUSB0 or COM3 for USB, or the controller's IP address (e.g. 192.168.5.1) for Ethernet boards like the SLB-EXT.",
         "data": {
-          "host": "Host / IP address",
-          "port": "Port",
-          "serial_port": "Serial port path (e.g. /dev/ttyUSB0)",
-          "baudrate": "Baud rate",
+          "host": "Host / IP address of the gSender PC",
+          "port": "Remote Mode port",
+          "serial_port": "Controller port (serial path or controller IP)",
+          "network": "Controller is connected over Ethernet/network (e.g. SLB-EXT)",
+          "baudrate": "Baud rate (ignored for Ethernet controllers)",
           "firmware": "Controller firmware (for the Connect button)"
         }
       },
       "reconfigure": {
         "title": "Reconfigure gSender",
-        "description": "Update the connection details. Useful when the gSender PC got a new IP address or the CNC moved to a different serial port.",
+        "description": "Update the connection details. Useful when the gSender PC got a new IP address or the CNC moved to a different port.",
         "data": {
-          "host": "Host / IP address",
-          "port": "Port",
-          "serial_port": "Serial port path (e.g. /dev/ttyUSB0)",
-          "baudrate": "Baud rate",
+          "host": "Host / IP address of the gSender PC",
+          "port": "Remote Mode port",
+          "serial_port": "Controller port (serial path or controller IP)",
+          "network": "Controller is connected over Ethernet/network (e.g. SLB-EXT)",
+          "baudrate": "Baud rate (ignored for Ethernet controllers)",
           "firmware": "Controller firmware (for the Connect button)"
         }
       }

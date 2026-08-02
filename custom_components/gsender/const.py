@@ -5,6 +5,12 @@ DOMAIN = "gsender"
 CONF_SERIAL_PORT = "serial_port"
 CONF_BAUDRATE = "baudrate"
 CONF_FIRMWARE = "firmware"
+# Controller connected to the gSender PC over Ethernet/network (e.g.
+# SLB-EXT built-in Ethernet) instead of USB serial. The "serial_port"
+# value is then the controller's IP address as shown in gSender.
+CONF_NETWORK = "network"
+
+DEFAULT_NETWORK = False
 
 DEFAULT_PORT = 8000
 DEFAULT_SERIAL_PORT = "/dev/ttyUSB0"

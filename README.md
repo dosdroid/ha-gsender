@@ -129,10 +129,14 @@ vs "PC is on, remind me to launch gSender".
 2. Fill in:
    - **Host / IP** and **port** — shown in gSender under Config → Remote Mode
      (default port `8000`)
-   - **Serial port path** — must exactly match the port gSender uses for your
-     machine, e.g. `/dev/ttyUSB0` (Linux) or `COM3` (Windows)
+   - **Controller port** — must exactly match the port gSender uses for your
+     machine: a serial path like `/dev/ttyUSB0` (Linux) or `COM3` (Windows)
+     for USB, **or the controller's IP address** (e.g. `192.168.5.1`) for
+     Ethernet-connected boards like the SLB-EXT — tick the
+     **Ethernet/network** checkbox in that case
    - **Baud rate** and **firmware** (`Grbl` / `grblHAL`) — only used by the
-     Connect button; defaults suit most machines
+     Connect button; baud rate is ignored for Ethernet controllers and the
+     defaults suit most machines
 3. Everything can be changed later via **Reconfigure** on the integration
    entry (handy when the gSender PC gets a new DHCP address) but it is recommended to put CNC PC on static address.
 
@@ -164,6 +168,9 @@ vs "PC is on, remind me to launch gSender".
   only as accurate as its own estimates.
 - If a firewall silently drops traffic to the gSender PC, `host_off` cannot
   be distinguished from the PC being off.
+- Ethernet/network controller support (SLB-EXT etc.) mirrors what gSender's
+  own Connect sends (`network: true` with the controller IP as the port)
+  but has not yet been confirmed on real hardware — feedback welcome.
 
 ## Credits
 

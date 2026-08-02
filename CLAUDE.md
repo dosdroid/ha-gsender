@@ -60,6 +60,13 @@ is not "published" to users until the release exists.
   off, fix it there only.
 - gSender's `task:*` events are unused on purpose: their payload shapes
   are unverified. Job events derive from `workflow:state` transitions.
+- Ethernet/network controller support (v0.6.0, for the owner's SLB-EXT) is
+  **assumption-based, not hardware-verified**: it assumes gSender
+  identifies a network controller by its IP address in the same "port"
+  string used everywhere (addclient, serialport:* events, port list) and
+  that Connect differs only by `network: true` in the open options. If the
+  owner reports it failing, check what gSender's UI actually emits for a
+  network connect before changing anything else.
 - The smoke test monkeypatches module globals (`HOST_PROBE_TIMEOUT`,
   `CONNECT_RETRY_INTERVAL`) to speed things up — keep timing constants
   module-level in `__init__.py` and read them at call time; never copy

@@ -370,6 +370,32 @@ async def main() -> None:
         raised = "Port not found" in str(err)
     ok(raised, "gSender error ack surfaces as HomeAssistantError")
 
+    print("network (Ethernet) controller, e.g. SLB-EXT")
+    netclient = GSenderClient(
+        hass, "127.0.0.1", 8000, "192.168.5.1", network=True
+    )
+    netclient._shutting_down = True
+    netclient.connected = True
+    netcalls: list[tuple] = []
+
+    async def net_call(event, data=None, timeout=None):
+        netcalls.append((event, data, timeout))
+        return None
+
+    netclient.sio.call = net_call
+    netbutton = GSenderConnectButton(netclient, entry)
+    await netbutton.async_press()
+    net_port, net_options = netcalls[0][1]
+    ok(net_port == "192.168.5.1", "open carries controller IP as the port")
+    ok(net_options["network"] is True, "open options set network true")
+    ok(net_options["defaultFirmware"] == "grblHAL", "network default firmware grblHAL")
+    nh = netclient.sio.handlers["/"]
+    netclient.controller_attached = True
+    await nh["serialport:close"]({"port": "/dev/ttyUSB0"})
+    ok(netclient.controller_attached, "other port close ignored for IP identifier")
+    await nh["serialport:close"]({"port": "192.168.5.1"})
+    ok(not netclient.controller_attached, "IP port identifier matched in events")
+
     print("host status probe")
     host_sensor = GSenderHostStatusSensor(client, entry)
     ok(host_sensor.available, "host status sensor always available")

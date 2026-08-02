@@ -13,9 +13,11 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 from .const import (
     CONF_BAUDRATE,
     CONF_FIRMWARE,
+    CONF_NETWORK,
     CONF_SERIAL_PORT,
     DEFAULT_BAUDRATE,
     DEFAULT_FIRMWARE,
+    DEFAULT_NETWORK,
     DEFAULT_PORT,
     DEFAULT_SERIAL_PORT,
     DOMAIN,
@@ -29,6 +31,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_HOST): str,
         vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
         vol.Required(CONF_SERIAL_PORT, default=DEFAULT_SERIAL_PORT): str,
+        vol.Required(CONF_NETWORK, default=DEFAULT_NETWORK): bool,
         vol.Required(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): int,
         vol.Required(CONF_FIRMWARE, default=DEFAULT_FIRMWARE): vol.In(FIRMWARE_TYPES),
     }
@@ -118,6 +121,10 @@ class GSenderConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_HOST, default=defaults[CONF_HOST]): str,
                 vol.Required(CONF_PORT, default=defaults[CONF_PORT]): int,
                 vol.Required(CONF_SERIAL_PORT, default=defaults[CONF_SERIAL_PORT]): str,
+                vol.Required(
+                    CONF_NETWORK,
+                    default=defaults.get(CONF_NETWORK, DEFAULT_NETWORK),
+                ): bool,
                 vol.Required(
                     CONF_BAUDRATE,
                     default=defaults.get(CONF_BAUDRATE, DEFAULT_BAUDRATE),
