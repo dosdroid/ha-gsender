@@ -46,6 +46,13 @@ async def _test_connection(host: str, port: int) -> bool:
     except Exception as err:  # noqa: BLE001
         _LOGGER.debug("gSender connection test failed for %s: %s", url, err)
         return False
+    finally:
+        # python-socketio leaves its aiohttp session open after a FAILED
+        # connect (disconnect() is a no-op while not connected), so every
+        # failed add/reconfigure attempt would leak one session.
+        http = getattr(sio.eio, "http", None)
+        if http is not None and not http.closed:
+            await http.close()
 
 
 class GSenderConfigFlow(ConfigFlow, domain=DOMAIN):

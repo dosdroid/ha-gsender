@@ -10,6 +10,15 @@ what HACS installs.
 
 ## [Unreleased]
 
+### Fixed
+
+- A failed connection test when adding or reconfiguring the integration no
+  longer leaks an aiohttp client session (python-socketio leaves its
+  session open after a failed connect). The same cleanup runs when
+  unloading an entry that never managed to connect.
+
+### Added
+
 - `tests/live_test.py`: real-socket end-to-end test of host-off startup
   recovery (server started after setup; asserts automatic connect).
 - `CLAUDE.md`: release process, testing notes, deliberate decisions, and

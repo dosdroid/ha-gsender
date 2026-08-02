@@ -486,6 +486,15 @@ class GSenderClient:
                 await self.sio.disconnect()
         except Exception:  # noqa: BLE001
             pass
+        # If the entry unloads before ever connecting (only failed connect
+        # attempts), python-socketio's aiohttp session is still open and
+        # disconnect() above was a no-op - close it explicitly.
+        try:
+            http = getattr(self.sio.eio, "http", None)
+            if http is not None and not http.closed:
+                await http.close()
+        except Exception:  # noqa: BLE001
+            pass
 
     @property
     def job_progress_percent(self) -> int:

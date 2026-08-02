@@ -415,6 +415,30 @@ async def main() -> None:
     ok(diag["entry_data"]["host"] == "**REDACTED**", "diagnostics redacts host")
     ok("machine_state" in diag["client"], "diagnostics includes client state")
 
+    print("config flow connection-test cleanup")
+    created: list = []
+    orig_async_client = config_flow.socketio.AsyncClient
+
+    class TrackingClient(orig_async_client):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            created.append(self)
+
+    config_flow.socketio.AsyncClient = TrackingClient
+    try:
+        # 127.0.0.1 port 1: refused instantly - a real failed connect
+        ok(
+            await config_flow._test_connection("127.0.0.1", 1) is False,
+            "unreachable host -> validation False",
+        )
+    finally:
+        config_flow.socketio.AsyncClient = orig_async_client
+    test_http = getattr(created[0].eio, "http", None)
+    ok(
+        test_http is None or test_http.closed,
+        "no leaked aiohttp session after failed connection test",
+    )
+
     print("setup with host off (HA restart while CNC PC is down)")
     gsender_module.CONNECT_RETRY_INTERVAL = 0.05
     hass2 = HomeAssistant()
