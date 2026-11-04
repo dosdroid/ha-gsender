@@ -109,13 +109,18 @@ vs "PC is on, remind me to launch gSender".
 
 ## Installation
 
-### HACS (custom repository)
+### Home Assistant Marketplace (custom repository)
 
-1. In Home Assistant, open **HACS**
-2. Menu (⋮) → **Custom repositories**
-3. Repository: `https://github.com/dosdroid/ha-gsender`, type: **Integration**
-4. Click **Add**, then find **gSender** in HACS and install it
-5. Restart Home Assistant
+The Marketplace replaced HACS in Home Assistant. If you already installed
+gSender through HACS, it was migrated automatically and keeps receiving
+updates. HACS-style links and `/hacs` bookmarks now open the Marketplace.
+
+1. In Home Assistant, open **Settings → Marketplace**
+2. Add a custom repository: `https://github.com/dosdroid/ha-gsender`, type:
+   **Integration**. The Marketplace reads custom repositories directly from
+   GitHub, so this needs a GitHub connection in Home Assistant.
+3. Install **gSender** from the Marketplace
+4. Restart Home Assistant
 
 ### Manual
 

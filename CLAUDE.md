@@ -20,8 +20,11 @@ if the release already exists it does nothing. Manual trigger:
 pushed before the workflow existed or in a commit that didn't touch the
 manifest).
 
-HACS installs from the **latest GitHub release** (not `main`), so a change
-is not "published" to users until the release exists.
+The Home Assistant Marketplace (which replaced HACS) installs from the
+**latest GitHub release** (not `main`), and by default offers only stable
+releases, so a change is not "published" to users until the release exists.
+Custom repositories must stay public and keep their `hacs.json` (see
+https://www.home-assistant.io/integrations/marketplace/#custom-repositories).
 
 ### Gotchas learned the hard way
 
