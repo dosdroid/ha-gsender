@@ -111,9 +111,11 @@ vs "PC is on, remind me to launch gSender".
 
 ### Home Assistant Marketplace (custom repository)
 
-The Marketplace replaced HACS in Home Assistant. If you already installed
-gSender through HACS, it was migrated automatically and keeps receiving
-updates. HACS-style links and `/hacs` bookmarks now open the Marketplace.
+The Marketplace is built into Home Assistant from **2026.11** and replaced
+HACS there. If you already installed gSender through HACS, it was migrated
+automatically and keeps receiving updates. HACS-style links and `/hacs`
+bookmarks now open the Marketplace. On Home Assistant 2026.3 – 2026.10,
+install gSender through HACS as before.
 
 1. In Home Assistant, open **Settings → Marketplace**
 2. Add a custom repository: `https://github.com/dosdroid/ha-gsender`, type:

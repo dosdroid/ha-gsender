@@ -13,7 +13,9 @@ what the Home Assistant Marketplace installs.
 ### Changed
 
 - README installation now describes the Home Assistant Marketplace, which
-  replaced HACS. Existing HACS installs migrate automatically.
+  is built into Home Assistant 2026.11 and replaced HACS there. Existing
+  HACS installs migrate automatically; HACS remains the path on 2026.3 –
+  2026.10.
 
 ## [0.6.0] - 2026-08-02
 
