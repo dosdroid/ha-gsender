@@ -6,7 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Each release's notes are published automatically as a
 [GitHub release](https://github.com/dosdroid/ha-gsender/releases), which is
-what HACS installs.
+what the Home Assistant Marketplace installs.
+
+## [Unreleased]
+
+### Changed
+
+- README installation now describes the Home Assistant Marketplace, which
+  is built into Home Assistant 2026.11 and replaced HACS there. Existing
+  HACS installs migrate automatically; HACS remains the path on 2026.3 –
+  2026.10.
 
 ## [0.6.0] - 2026-08-02
 
